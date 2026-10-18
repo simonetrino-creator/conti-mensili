@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conti del mese</title>
+<style>
+:root{--bg:#eef2f0;--card:#fff;--ink:#14211f;--mute:#62716e;--line:#d8e0dd;--in:#0b7a68;--out:#c2410c;--acc:#14211f;--accink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1715;--card:#18231f;--ink:#e8f0ed;--mute:#8fa09b;--line:#2a3833;--in:#3ec9ad;--out:#ff8a5c;--acc:#e8f0ed;--accink:#0f1715;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1715;--card:#18231f;--ink:#e8f0ed;--mute:#8fa09b;--line:#2a3833;--in:#3ec9ad;--out:#ff8a5c;--acc:#e8f0ed;--accink:#0f1715;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.4}
+main{max-width:520px;margin:0 auto;padding:16px 16px 110px}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.nav h1{font-size:20px;font-weight:800;margin:0;text-transform:capitalize}
+button{font:inherit;color:inherit;cursor:pointer}
+.ic{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:20px}
+.bal{background:var(--acc);color:var(--accink);border-radius:20px;padding:20px}
+.bal small{opacity:.7}
+.bal .n{font-size:40px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.box small{color:var(--mute)}
+.box b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.in{color:var(--in)}.out{color:var(--out)}
+h2{font-size:15px;margin:24px 0 8px;color:var(--mute);font-weight:600}
+.cat{margin-bottom:10px}
+.cat div{display:flex;justify-content:space-between;font-size:14px}
+.bar{height:8px;border-radius:4px;background:var(--line);margin-top:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--out);border-radius:4px}
+.tx{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.tx .d{width:42px;text-align:center;font-size:12px;color:var(--mute);line-height:1.1}
+.tx .d b{display:block;font-size:18px;color:var(--ink)}
+.tx .m{flex:1;min-width:0}
+.tx .m span{display:block;font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx .a{font-weight:600;font-variant-numeric:tabular-nums}
+.x{border:0;background:none;color:var(--mute);font-size:18px;width:32px;height:32px}
+.empty{padding:28px 8px;text-align:center;color:var(--mute)}
+.fab{position:fixed;right:max(16px,calc(50% - 244px));bottom:calc(20px + env(safe-area-inset-bottom,0px));height:56px;padding:0 24px;border-radius:28px;border:0;background:var(--in);color:#fff;font-weight:600;font-size:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+dialog{border:0;border-radius:22px 22px 0 0;padding:20px;width:100%;max-width:520px;margin:auto auto 0;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:14px}
+.seg button{border:0;background:none;padding:10px;border-radius:9px;font-weight:600}
+.seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+input,select{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.amt{font-size:28px;font-weight:800}
+.save{margin-top:16px;width:100%;height:50px;border:0;border-radius:12px;background:var(--acc);color:var(--accink);font-weight:600}
+.cancel{width:100%;margin-top:6px;height:44px;border:0;background:none;color:var(--mute)}
+.tools{display:flex;gap:8px;margin-top:22px}
+.tools button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+  <div class="nav">
+    <button class="ic" id="prev" aria-label="Mese precedente">‹</button>
+    <h1 id="mese"></h1>
+    <button class="ic" id="next" aria-label="Mese successivo">›</button>
+  </div>
+  <div class="bal"><small>Saldo del mese</small><div class="n" id="saldo"></div></div>
+  <div class="row2">
+    <div class="box"><small>Entrate</small><b class="in" id="tin"></b></div>
+    <div class="box"><small>Uscite</small><b class="out" id="tout"></b></div>
+  </div>
+  <h2>Uscite per categoria</h2>
+  <div id="cats"></div>
+  <h2>Movimenti</h2>
+  <div id="list"></div>
+  <div class="tools">
+    <button id="csv">Esporta CSV</button>
+  </div>
+</main>
+<button class="fab" id="add">+ Aggiungi</button>
+
+<dialog id="dlg">
+  <div class="seg"><button data-t="out" class="on">Uscita</button><button data-t="in">Entrata</button></div>
+  <label for="importo">Importo (€) — puoi sommare, es. 18+24+19,50</label>
+  <input id="importo" class="amt" type="text" inputmode="text" autocomplete="off" placeholder="0,00">
+  <label for="cat">Categoria</label>
+  <select id="cat"></select>
+  <label for="data">Data</label>
+  <input id="data" type="date">
+  <label for="nota" id="lnota">Nota</label>
+  <input id="nota" type="text" placeholder="Facoltativa">
+  <button class="save" id="save">Salva movimento</button>
+  <button class="cancel" id="cancel">Annulla</button>
+</dialog>
+
+<script>
+const CAT={out:["Manutenzione/oggetti x casa","Elettricità","Riscaldamento","Acqua","Spazzatura","Spesa alimentare","Ristoranti/bar","Viaggi","Sport/hobby","Vestiti","Assicurazione","Carburante","Móvil e internet","Spese auto","Caselli","Medicine"],in:["Stipendio","Funghi"]};
+const KEY="conti-mensili-v1";
+let tx=[],type="out",cur=new Date();cur.setDate(1);
+try{tx=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){tx=[]}
+const $=id=>document.getElementById(id);
+const eur=n=>n.toLocaleString("it-IT",{style:"currency",currency:"EUR"});
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(tx))}catch(e){}};
+const ym=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function render(){
+  $("mese").textContent=cur.toLocaleDateString("it-IT",{month:"long",year:"numeric"});
+  const m=tx.filter(t=>t.d.startsWith(ym(cur))).sort((a,b)=>b.d.localeCompare(a.d));
+  const tin=m.filter(t=>t.t==="in").reduce((s,t)=>s+t.a,0);
+  const tout=m.filter(t=>t.t==="out").reduce((s,t)=>s+t.a,0);
+  $("saldo").textContent=eur(tin-tout);$("tin").textContent=eur(tin);$("tout").textContent=eur(tout);
+  const by={};m.filter(t=>t.t==="out").forEach(t=>by[t.c]=(by[t.c]||0)+t.a);
+  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  $("cats").innerHTML=rows.length?rows.map(([c,v])=>`<div class="cat"><div><span>${esc(c)}</span><span>${eur(v)}</span></div><div class="bar"><i style="width:${v/tout*100}%"></i></div></div>`).join(""):'<div class="empty">Nessuna uscita registrata.</div>';
+  $("list").innerHTML=m.length?m.map(t=>{const d=new Date(t.d);return `<div class="tx"><div class="d"><b>${d.getDate()}</b>${d.toLocaleDateString("it-IT",{month:"short"})}</div><div class="m">${esc(t.c)}<span>${esc(t.n||"")}</span></div><div class="a ${t.t}">${t.t==="in"?"+":"−"}${eur(t.a)}</div><button class="x" data-id="${t.id}" aria-label="Elimina">×</button></div>`}).join(""):'<div class="empty">Nessun movimento in questo mese. Tocca “Aggiungi” per iniziare.</div>';
+}
+function setType(t){type=t;document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$("cat").innerHTML=CAT[t].map(c=>`<option>${c}</option>`).join("");catChange()}
+function catChange(){const as=$("cat").value==="Assicurazione";$("lnota").textContent=as?"Per cosa? (es. auto, casa, gatto)":"Nota";$("nota").placeholder=as?"Obbligatorio per l’assicurazione":"Facoltativa"}
+$("cat").onchange=catChange;
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>setType(b.dataset.t));
+$("add").onclick=()=>{setType("out");$("importo").value="";$("nota").value="";const n=new Date();$("data").value=n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");$("dlg").showModal();$("importo").focus()};
+$("cancel").onclick=()=>$("dlg").close();
+$("save").onclick=()=>{
+  const parts=String($("importo").value).replace(/\s/g,"").replace(/,/g,".").split("+").filter(Boolean);
+  const a=parts.length&&parts.every(p=>/^\d*\.?\d+$/.test(p))?parts.reduce((s,p)=>s+parseFloat(p),0):NaN;
+  if(!(a>0)){$("importo").focus();return}
+  if($("cat").value==="Assicurazione"&&!$("nota").value.trim()){$("nota").focus();return}
+  if(!$("data").value)return;
+  tx.push({id:Date.now()+"",t:type,a:Math.round(a*100)/100,c:$("cat").value,d:$("data").value,n:$("nota").value.trim()});
+  save();const d=new Date($("data").value);cur=new Date(d.getFullYear(),d.getMonth(),1);$("dlg").close();render();
+};
+$("list").onclick=e=>{const id=e.target.dataset.id;if(id&&confirm("Eliminare questo movimento?")){tx=tx.filter(t=>t.id!==id);save();render()}};
+$("prev").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()-1,1);render()};
+$("next").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);render()};
+$("csv").onclick=async()=>{
+  const m=tx.filter(t=>t.d.startsWith(ym(cur)));
+  const csv="Data;Tipo;Categoria;Importo;Nota\n"+m.map(t=>[t.d,t.t==="in"?"Entrata":"Uscita",t.c,String(t.a).replace(".",","),'"'+t.n.replace(/"/g,'""')+'"'].join(";")).join("\n");
+  try{
+    const S=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Share;
+    if(S){await S.share({title:"Conti "+ym(cur),text:csv,dialogTitle:"Esporta CSV"});return}
+    await navigator.clipboard.writeText(csv);alert("CSV copiato negli appunti.");
+  }catch(e){}
+};
+render();
+</script>
+</body>
+</html>
