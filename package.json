@@ -1,0 +1,12 @@
+{
+  "name": "conti-mensili",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Entrate e uscite mese per mese",
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/share": "^7.0.0"
+  }
+}
