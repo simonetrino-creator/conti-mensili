@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Conti del mese</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Conti">
+<meta name="theme-color" content="#14211f">
 <style>
 :root{--bg:#eef2f0;--card:#fff;--ink:#14211f;--mute:#62716e;--line:#d8e0dd;--in:#0b7a68;--out:#c2410c;--acc:#14211f;--accink:#fff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -145,7 +151,8 @@ nl:{sub:"Saldo van de maand",inn:"Inkomsten",outt:"Uitgaven",byCat:"Uitgaven per
 const K="conti-mensili-v1",KC="conti-mensili-cats",KN="conti-mensili-notes",KS="conti-mensili-set";
 const ld=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?f:v}catch(e){return f}};
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let tx=ld(K,[]),CAT=ld(KC,DEF),notes=ld(KN,[]),S=ld(KS,{lang:"it",open:true});
+let tx=ld(K,[]),CAT=ld(KC,DEF),notes=ld(KN,[]),S=ld(KS,null);
+if(!S){const nl=(navigator.language||"it").slice(0,2);S={lang:T[nl]?nl:"it",open:true}}
 if(!T[S.lang])S.lang="it";
 let type="out",mt="out",cur=new Date();cur.setDate(1);
 let cm=new Date(),cd=null;cm.setDate(1);
@@ -263,9 +270,15 @@ $("csv").onclick=async()=>{
   try{
     const Sh=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Share;
     if(Sh){await Sh.share({title:"Conti "+p,text:csv,dialogTitle:t("csv")});return}
+    if(navigator.share){
+      const f=new File(["\ufeff"+csv],"conti-"+p+".csv",{type:"text/csv"});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:"Conti "+p});return}
+      await navigator.share({title:"Conti "+p,text:csv});return;
+    }
     await navigator.clipboard.writeText(csv);alert(t("copied"));
   }catch(e){}
 };
+if("serviceWorker" in navigator&&!window.Capacitor&&/^https?:/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(()=>{});
 applyLang();setType("out");render();
 </script>
 </body>
