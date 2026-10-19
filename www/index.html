@@ -13,6 +13,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.4}
 main{max-width:520px;margin:0 auto;padding:16px 16px 110px}
+.top{display:flex;justify-content:flex-end;margin-bottom:8px}
 .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .nav h1{font-size:20px;font-weight:800;margin:0;text-transform:capitalize}
 button{font:inherit;color:inherit;cursor:pointer}
@@ -26,6 +27,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .box b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
 .in{color:var(--in)}.out{color:var(--out)}
 h2{font-size:15px;margin:24px 0 8px;color:var(--mute);font-weight:600}
+.hd{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;background:none;padding:0;margin:24px 0 8px;font-size:15px;color:var(--mute);font-weight:600}
 .cat{margin-bottom:10px}
 .cat div{display:flex;justify-content:space-between;font-size:14px}
 .bar{height:8px;border-radius:4px;background:var(--line);margin-top:4px;overflow:hidden}
@@ -39,7 +41,7 @@ h2{font-size:15px;margin:24px 0 8px;color:var(--mute);font-weight:600}
 .x{border:0;background:none;color:var(--mute);font-size:18px;width:32px;height:32px}
 .empty{padding:28px 8px;text-align:center;color:var(--mute)}
 .fab{position:fixed;right:max(16px,calc(50% - 244px));bottom:calc(20px + env(safe-area-inset-bottom,0px));height:56px;padding:0 24px;border-radius:28px;border:0;background:var(--in);color:#fff;font-weight:600;font-size:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-dialog{border:0;border-radius:22px 22px 0 0;padding:20px;width:100%;max-width:520px;margin:auto auto 0;background:var(--card);color:var(--ink)}
+dialog{border:0;border-radius:22px 22px 0 0;padding:20px;width:100%;max-width:520px;max-height:90vh;overflow:auto;margin:auto auto 0;background:var(--card);color:var(--ink)}
 dialog::backdrop{background:rgba(0,0,0,.5)}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:14px}
 .seg button{border:0;background:none;padding:10px;border-radius:9px;font-weight:600}
@@ -49,96 +51,222 @@ input,select{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px 
 .amt{font-size:28px;font-weight:800}
 .save{margin-top:16px;width:100%;height:50px;border:0;border-radius:12px;background:var(--acc);color:var(--accink);font-weight:600}
 .cancel{width:100%;margin-top:6px;height:44px;border:0;background:none;color:var(--mute)}
-.tools{display:flex;gap:8px;margin-top:22px}
-.tools button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:14px}
+.opb{display:block;width:100%;text-align:left;padding:14px;margin-top:8px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dh b{font-size:18px;text-transform:capitalize}
+.cr{display:flex;align-items:center;gap:4px;padding:8px 0;border-bottom:1px solid var(--line)}
+.cr span{flex:1;min-width:0;overflow-wrap:anywhere}
+.addr{display:flex;gap:8px;margin-top:12px}
+.addr button{padding:0 16px;border:0;border-radius:10px;background:var(--acc);color:var(--accink);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.grid b{font-size:12px;color:var(--mute);font-weight:600;padding:4px 0}
+.day{position:relative;height:42px;border:0;border-radius:10px;background:none}
+.day.today{border:1px solid var(--mute)}
+.day.sel{background:var(--acc);color:var(--accink)}
+.day u{position:absolute;left:50%;bottom:5px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--in)}
+.nr{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}
+.nr span{flex:1;min-width:0;overflow-wrap:anywhere;cursor:pointer}
+.sm{font-size:14px;color:var(--mute);padding:4px 0;display:flex;justify-content:space-between}
 </style>
 </head>
 <body>
 <main>
+  <div class="top"><button class="ic" id="optb" aria-label="Opzioni">⚙️</button></div>
   <div class="nav">
-    <button class="ic" id="prev" aria-label="Mese precedente">‹</button>
+    <button class="ic" id="prev" aria-label="‹">‹</button>
     <h1 id="mese"></h1>
-    <button class="ic" id="next" aria-label="Mese successivo">›</button>
+    <button class="ic" id="next" aria-label="›">›</button>
   </div>
-  <div class="bal"><small>Saldo del mese</small><div class="n" id="saldo"></div></div>
+  <div class="bal"><small data-i="sub"></small><div class="n" id="saldo"></div></div>
   <div class="row2">
-    <div class="box"><small>Entrate</small><b class="in" id="tin"></b></div>
-    <div class="box"><small>Uscite</small><b class="out" id="tout"></b></div>
+    <div class="box"><small data-i="inn"></small><b class="in" id="tin"></b></div>
+    <div class="box"><small data-i="outt"></small><b class="out" id="tout"></b></div>
   </div>
-  <h2>Uscite per categoria</h2>
+  <h2 data-i="byCat"></h2>
   <div id="cats"></div>
-  <h2>Movimenti</h2>
+  <button class="hd" id="tog"><span data-i="mov"></span><span id="chev">▾</span></button>
   <div id="list"></div>
-  <div class="tools">
-    <button id="csv">Esporta CSV</button>
-  </div>
 </main>
-<button class="fab" id="add">+ Aggiungi</button>
+<button class="fab" id="add" data-i="add"></button>
 
 <dialog id="dlg">
-  <div class="seg"><button data-t="out" class="on">Uscita</button><button data-t="in">Entrata</button></div>
-  <label for="importo">Importo (€) — puoi sommare, es. 18+24+19,50</label>
+  <div class="seg"><button data-t="out" class="on" data-i="tOut"></button><button data-t="in" data-i="tIn"></button></div>
+  <label for="importo" data-i="amt"></label>
   <input id="importo" class="amt" type="text" inputmode="text" autocomplete="off" placeholder="0,00">
-  <label for="cat">Categoria</label>
+  <label for="cat" data-i="cat"></label>
   <select id="cat"></select>
-  <label for="data">Data</label>
+  <label for="data" data-i="date"></label>
   <input id="data" type="date">
-  <label for="nota" id="lnota">Nota</label>
-  <input id="nota" type="text" placeholder="Facoltativa">
-  <button class="save" id="save">Salva movimento</button>
-  <button class="cancel" id="cancel">Annulla</button>
+  <label for="nota" id="lnota"></label>
+  <input id="nota" type="text">
+  <button class="save" id="save" data-i="saveTx"></button>
+  <button class="cancel" id="cancel" data-i="cancel"></button>
+</dialog>
+
+<dialog id="opt">
+  <div class="dh"><b data-i="options"></b></div>
+  <label for="langSel" data-i="lang"></label>
+  <select id="langSel"><option value="it">Italiano</option><option value="es">Español</option><option value="en">English</option><option value="nl">Vlaams (Nederlands)</option></select>
+  <button class="opb" id="oCat" data-i="manage"></button>
+  <button class="opb" id="oCal" data-i="cal"></button>
+  <button class="opb" id="csv" data-i="csv"></button>
+  <button class="cancel" data-close="opt" data-i="close"></button>
+</dialog>
+
+<dialog id="mc">
+  <div class="dh"><b data-i="manage"></b></div>
+  <div class="seg"><button data-m="out" class="on" data-i="tOut"></button><button data-m="in" data-i="tIn"></button></div>
+  <div id="mcl"></div>
+  <div class="addr"><input id="ncat" type="text" data-p="newCat"><button id="ncb" data-i="addB"></button></div>
+  <button class="cancel" data-close="mc" data-i="close"></button>
+</dialog>
+
+<dialog id="cal">
+  <div class="dh"><button class="ic" id="cp">‹</button><b id="calT"></b><button class="ic" id="cn">›</button></div>
+  <div class="grid" id="grid"></div>
+  <div id="dayP" hidden>
+    <h2 id="dayT" style="text-transform:capitalize"></h2>
+    <div id="dayTx"></div>
+    <div id="dayN"></div>
+    <div class="addr"><input id="noteIn" type="text" data-p="noteNew"><button id="noteAdd" data-i="addB"></button></div>
+  </div>
+  <button class="cancel" data-close="cal" data-i="close"></button>
 </dialog>
 
 <script>
-const CAT={out:["Manutenzione/oggetti x casa","Elettricità","Riscaldamento","Acqua","Spazzatura","Spesa alimentare","Ristoranti/bar","Viaggi","Sport/hobby","Vestiti","Assicurazione","Carburante","Móvil e internet","Spese auto","Caselli","Medicine"],in:["Stipendio","Funghi"]};
-const KEY="conti-mensili-v1";
-let tx=[],type="out",cur=new Date();cur.setDate(1);
-try{tx=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){tx=[]}
+const DEF={out:["Manutenzione/oggetti x casa","Elettricità","Riscaldamento","Acqua","Spazzatura","Spesa alimentare","Ristoranti/bar","Viaggi","Sport/hobby","Vestiti","Assicurazione","Carburante","Móvil e internet","Spese auto","Caselli","Medicine"],in:["Stipendio","Funghi"]};
+const LOC={it:"it-IT",es:"es-ES",en:"en-GB",nl:"nl-BE"};
+const T={
+it:{sub:"Saldo del mese",inn:"Entrate",outt:"Uscite",byCat:"Uscite per categoria",mov:"Movimenti",add:"+ Aggiungi",tOut:"Uscita",tIn:"Entrata",amt:"Importo (€) — puoi sommare, es. 18+24+19,50",cat:"Categoria",date:"Data",note:"Nota",opt:"Facoltativa",saveTx:"Salva movimento",cancel:"Annulla",noOut:"Nessuna uscita registrata.",noTx:"Nessun movimento in questo mese. Tocca “Aggiungi” per iniziare.",del:"Eliminare questo movimento?",insAsk:"Per cosa? (es. auto, casa, gatto)",insReq:"Obbligatorio per l’assicurazione",copied:"CSV copiato negli appunti.",options:"Opzioni",lang:"Lingua",manage:"Gestisci categorie",cal:"Calendario",csv:"Esporta CSV",close:"Chiudi",newCat:"Nuova categoria",addB:"Aggiungi",delCat:"Eliminare la categoria “%”?",delUsed:"Eliminare la categoria “%”? I movimenti già registrati restano con questo nome.",ren:"Nuovo nome:",notes:"Note",noteNew:"Scrivi una nota…",nt:"Nota",hdr:"Data;Tipo;Categoria;Importo;Nota",noMov:"Nessun movimento."},
+es:{sub:"Saldo del mes",inn:"Ingresos",outt:"Gastos",byCat:"Gastos por categoría",mov:"Movimientos",add:"+ Añadir",tOut:"Gasto",tIn:"Ingreso",amt:"Importe (€) — puedes sumar, p. ej. 18+24+19,50",cat:"Categoría",date:"Fecha",note:"Nota",opt:"Opcional",saveTx:"Guardar movimiento",cancel:"Cancelar",noOut:"Ningún gasto registrado.",noTx:"Ningún movimiento este mes. Toca “Añadir” para empezar.",del:"¿Eliminar este movimiento?",insAsk:"¿Para qué? (p. ej. coche, casa, gato)",insReq:"Obligatorio para el seguro",copied:"CSV copiado al portapapeles.",options:"Opciones",lang:"Idioma",manage:"Gestionar categorías",cal:"Calendario",csv:"Exportar CSV",close:"Cerrar",newCat:"Nueva categoría",addB:"Añadir",delCat:"¿Eliminar la categoría “%”?",delUsed:"¿Eliminar la categoría “%”? Los movimientos ya registrados conservan este nombre.",ren:"Nuevo nombre:",notes:"Notas",noteNew:"Escribe una nota…",nt:"Nota",hdr:"Fecha;Tipo;Categoría;Importe;Nota",noMov:"Sin movimientos."},
+en:{sub:"Balance this month",inn:"Income",outt:"Expenses",byCat:"Expenses by category",mov:"Transactions",add:"+ Add",tOut:"Expense",tIn:"Income",amt:"Amount (€) — you can add up, e.g. 18+24+19.50",cat:"Category",date:"Date",note:"Note",opt:"Optional",saveTx:"Save transaction",cancel:"Cancel",noOut:"No expenses recorded.",noTx:"No transactions this month. Tap “Add” to start.",del:"Delete this transaction?",insAsk:"What for? (e.g. car, home, cat)",insReq:"Required for insurance",copied:"CSV copied to clipboard.",options:"Options",lang:"Language",manage:"Manage categories",cal:"Calendar",csv:"Export CSV",close:"Close",newCat:"New category",addB:"Add",delCat:"Delete the category “%”?",delUsed:"Delete the category “%”? Existing transactions keep this name.",ren:"New name:",notes:"Notes",noteNew:"Write a note…",nt:"Note",hdr:"Date;Type;Category;Amount;Note",noMov:"No transactions."},
+nl:{sub:"Saldo van de maand",inn:"Inkomsten",outt:"Uitgaven",byCat:"Uitgaven per categorie",mov:"Verrichtingen",add:"+ Toevoegen",tOut:"Uitgave",tIn:"Inkomst",amt:"Bedrag (€) — je kunt optellen, bv. 18+24+19,50",cat:"Categorie",date:"Datum",note:"Notitie",opt:"Optioneel",saveTx:"Verrichting opslaan",cancel:"Annuleren",noOut:"Geen uitgaven geregistreerd.",noTx:"Geen verrichtingen deze maand. Tik op “Toevoegen” om te beginnen.",del:"Deze verrichting verwijderen?",insAsk:"Waarvoor? (bv. auto, huis, kat)",insReq:"Verplicht voor de verzekering",copied:"CSV gekopieerd naar het klembord.",options:"Opties",lang:"Taal",manage:"Categorieën beheren",cal:"Kalender",csv:"CSV exporteren",close:"Sluiten",newCat:"Nieuwe categorie",addB:"Toevoegen",delCat:"De categorie “%” verwijderen?",delUsed:"De categorie “%” verwijderen? Bestaande verrichtingen behouden deze naam.",ren:"Nieuwe naam:",notes:"Notities",noteNew:"Schrijf een notitie…",nt:"Notitie",hdr:"Datum;Type;Categorie;Bedrag;Notitie",noMov:"Geen verrichtingen."}
+};
+const K="conti-mensili-v1",KC="conti-mensili-cats",KN="conti-mensili-notes",KS="conti-mensili-set";
+const ld=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?f:v}catch(e){return f}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let tx=ld(K,[]),CAT=ld(KC,DEF),notes=ld(KN,[]),S=ld(KS,{lang:"it",open:true});
+if(!T[S.lang])S.lang="it";
+let type="out",mt="out",cur=new Date();cur.setDate(1);
+let cm=new Date(),cd=null;cm.setDate(1);
 const $=id=>document.getElementById(id);
-const eur=n=>n.toLocaleString("it-IT",{style:"currency",currency:"EUR"});
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(tx))}catch(e){}};
-const ym=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+const t=k=>T[S.lang][k];
+const L=()=>LOC[S.lang];
+const eur=n=>n.toLocaleString(L(),{style:"currency",currency:"EUR"});
+const pad=n=>String(n).padStart(2,"0");
+const ym=d=>d.getFullYear()+"-"+pad(d.getMonth()+1);
+const ds=(y,m,d)=>y+"-"+pad(m+1)+"-"+pad(d);
+const pd=s=>{const p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const saveTx=()=>sv(K,tx),saveCat=()=>sv(KC,CAT),saveNotes=()=>sv(KN,notes),saveS=()=>sv(KS,S);
+const todayS=()=>{const n=new Date();return ds(n.getFullYear(),n.getMonth(),n.getDate())};
 
-function render(){
-  $("mese").textContent=cur.toLocaleDateString("it-IT",{month:"long",year:"numeric"});
-  const m=tx.filter(t=>t.d.startsWith(ym(cur))).sort((a,b)=>b.d.localeCompare(a.d));
-  const tin=m.filter(t=>t.t==="in").reduce((s,t)=>s+t.a,0);
-  const tout=m.filter(t=>t.t==="out").reduce((s,t)=>s+t.a,0);
-  $("saldo").textContent=eur(tin-tout);$("tin").textContent=eur(tin);$("tout").textContent=eur(tout);
-  const by={};m.filter(t=>t.t==="out").forEach(t=>by[t.c]=(by[t.c]||0)+t.a);
-  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
-  $("cats").innerHTML=rows.length?rows.map(([c,v])=>`<div class="cat"><div><span>${esc(c)}</span><span>${eur(v)}</span></div><div class="bar"><i style="width:${v/tout*100}%"></i></div></div>`).join(""):'<div class="empty">Nessuna uscita registrata.</div>';
-  $("list").innerHTML=m.length?m.map(t=>{const d=new Date(t.d);return `<div class="tx"><div class="d"><b>${d.getDate()}</b>${d.toLocaleDateString("it-IT",{month:"short"})}</div><div class="m">${esc(t.c)}<span>${esc(t.n||"")}</span></div><div class="a ${t.t}">${t.t==="in"?"+":"−"}${eur(t.a)}</div><button class="x" data-id="${t.id}" aria-label="Elimina">×</button></div>`}).join(""):'<div class="empty">Nessun movimento in questo mese. Tocca “Aggiungi” per iniziare.</div>';
+function applyLang(){
+  document.documentElement.lang=S.lang;
+  document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));
+  document.querySelectorAll("[data-p]").forEach(e=>e.placeholder=t(e.dataset.p));
+  $("langSel").value=S.lang;$("optb").setAttribute("aria-label",t("options"));
+  catChange();
 }
-function setType(t){type=t;document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$("cat").innerHTML=CAT[t].map(c=>`<option>${c}</option>`).join("");catChange()}
-function catChange(){const as=$("cat").value==="Assicurazione";$("lnota").textContent=as?"Per cosa? (es. auto, casa, gatto)":"Nota";$("nota").placeholder=as?"Obbligatorio per l’assicurazione":"Facoltativa"}
+function render(){
+  $("mese").textContent=cur.toLocaleDateString(L(),{month:"long",year:"numeric"});
+  const m=tx.filter(x=>x.d.startsWith(ym(cur))).sort((a,b)=>b.d.localeCompare(a.d));
+  const tin=m.filter(x=>x.t==="in").reduce((s,x)=>s+x.a,0);
+  const tout=m.filter(x=>x.t==="out").reduce((s,x)=>s+x.a,0);
+  $("saldo").textContent=eur(tin-tout);$("tin").textContent=eur(tin);$("tout").textContent=eur(tout);
+  const by={};m.filter(x=>x.t==="out").forEach(x=>by[x.c]=(by[x.c]||0)+x.a);
+  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  $("cats").innerHTML=rows.length?rows.map(([c,v])=>`<div class="cat"><div><span>${esc(c)}</span><span>${eur(v)}</span></div><div class="bar"><i style="width:${v/tout*100}%"></i></div></div>`).join(""):`<div class="empty">${t("noOut")}</div>`;
+  $("list").innerHTML=m.length?m.map(x=>{const d=pd(x.d);return `<div class="tx"><div class="d"><b>${d.getDate()}</b>${d.toLocaleDateString(L(),{month:"short"})}</div><div class="m">${esc(x.c)}<span>${esc(x.n||"")}</span></div><div class="a ${x.t}">${x.t==="in"?"+":"−"}${eur(x.a)}</div><button class="x" data-id="${x.id}" aria-label="×">×</button></div>`}).join(""):`<div class="empty">${t("noTx")}</div>`;
+  $("list").hidden=!S.open;$("chev").textContent=S.open?"▾":"▸";
+}
+$("tog").onclick=()=>{S.open=!S.open;saveS();render()};
+
+function setType(k){type=k;document.querySelectorAll("#dlg .seg button").forEach(b=>b.classList.toggle("on",b.dataset.t===k));$("cat").innerHTML=(CAT[k]||[]).map(c=>`<option>${esc(c)}</option>`).join("");catChange()}
+function catChange(){const as=$("cat").value==="Assicurazione";$("lnota").textContent=as?t("insAsk"):t("note");$("nota").placeholder=as?t("insReq"):t("opt")}
 $("cat").onchange=catChange;
-document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>setType(b.dataset.t));
-$("add").onclick=()=>{setType("out");$("importo").value="";$("nota").value="";const n=new Date();$("data").value=n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");$("dlg").showModal();$("importo").focus()};
+document.querySelectorAll("#dlg .seg button").forEach(b=>b.onclick=()=>setType(b.dataset.t));
+$("add").onclick=()=>{setType("out");$("importo").value="";$("nota").value="";$("data").value=todayS();$("dlg").showModal();$("importo").focus()};
 $("cancel").onclick=()=>$("dlg").close();
 $("save").onclick=()=>{
   const parts=String($("importo").value).replace(/\s/g,"").replace(/,/g,".").split("+").filter(Boolean);
   const a=parts.length&&parts.every(p=>/^\d*\.?\d+$/.test(p))?parts.reduce((s,p)=>s+parseFloat(p),0):NaN;
   if(!(a>0)){$("importo").focus();return}
+  if(!$("cat").value)return;
   if($("cat").value==="Assicurazione"&&!$("nota").value.trim()){$("nota").focus();return}
   if(!$("data").value)return;
   tx.push({id:Date.now()+"",t:type,a:Math.round(a*100)/100,c:$("cat").value,d:$("data").value,n:$("nota").value.trim()});
-  save();const d=new Date($("data").value);cur=new Date(d.getFullYear(),d.getMonth(),1);$("dlg").close();render();
+  saveTx();const d=pd($("data").value);cur=new Date(d.getFullYear(),d.getMonth(),1);$("dlg").close();render();
 };
-$("list").onclick=e=>{const id=e.target.dataset.id;if(id&&confirm("Eliminare questo movimento?")){tx=tx.filter(t=>t.id!==id);save();render()}};
+$("list").onclick=e=>{const id=e.target.dataset.id;if(id&&confirm(t("del"))){tx=tx.filter(x=>x.id!==id);saveTx();render();if($("cal").open)renderCal()}};
 $("prev").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()-1,1);render()};
 $("next").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);render()};
+
+/* Opzioni */
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>$(b.dataset.close).close());
+$("optb").onclick=()=>$("opt").showModal();
+$("langSel").onchange=e=>{S.lang=e.target.value;saveS();applyLang();render();if($("cal").open)renderCal();if($("mc").open)renderMC()};
+$("oCat").onclick=()=>{$("opt").close();renderMC();$("mc").showModal()};
+$("oCal").onclick=()=>{$("opt").close();cm=new Date(cur.getFullYear(),cur.getMonth(),1);cd=null;renderCal();$("cal").showModal()};
+
+/* Categorie */
+function renderMC(){
+  document.querySelectorAll("#mc .seg button").forEach(b=>b.classList.toggle("on",b.dataset.m===mt));
+  $("mcl").innerHTML=(CAT[mt]||[]).map((c,i)=>`<div class="cr"><span>${esc(c)}</span><button class="x" data-a="ren" data-k="${i}" aria-label="✎">✎</button><button class="x" data-a="del" data-k="${i}" aria-label="×">×</button></div>`).join("");
+}
+document.querySelectorAll("#mc .seg button").forEach(b=>b.onclick=()=>{mt=b.dataset.m;renderMC()});
+$("mcl").onclick=e=>{
+  const a=e.target.dataset.a;if(!a)return;const i=+e.target.dataset.k,old=CAT[mt][i];
+  if(a==="del"){
+    const used=tx.some(x=>x.t===mt&&x.c===old);
+    if(confirm(t(used?"delUsed":"delCat").replace("%",old))){CAT[mt].splice(i,1);saveCat();renderMC()}
+  }else{
+    const n=(prompt(t("ren"),old)||"").trim();
+    if(n&&n!==old&&!CAT[mt].includes(n)){CAT[mt][i]=n;tx.forEach(x=>{if(x.t===mt&&x.c===old)x.c=n});saveCat();saveTx();renderMC();render()}
+  }
+};
+$("ncb").onclick=()=>{const n=$("ncat").value.trim();if(n&&!CAT[mt].includes(n)){CAT[mt].push(n);saveCat();$("ncat").value="";renderMC()}};
+
+/* Calendario */
+function renderCal(){
+  const y=cm.getFullYear(),m=cm.getMonth(),td=todayS();
+  $("calT").textContent=cm.toLocaleDateString(L(),{month:"long",year:"numeric"});
+  const first=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate();
+  let h="";for(let i=0;i<7;i++)h+=`<b>${new Date(2026,0,5+i).toLocaleDateString(L(),{weekday:"narrow"})}</b>`;
+  for(let i=0;i<first;i++)h+="<i></i>";
+  for(let d=1;d<=n;d++){const s=ds(y,m,d),dot=tx.some(x=>x.d===s)||notes.some(x=>x.d===s);
+    h+=`<button class="day${s===cd?" sel":""}${s===td?" today":""}" data-d="${s}">${d}${dot?"<u></u>":""}</button>`}
+  $("grid").innerHTML=h;
+  $("dayP").hidden=!cd;
+  if(!cd)return;
+  $("dayT").textContent=pd(cd).toLocaleDateString(L(),{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const dt=tx.filter(x=>x.d===cd);
+  $("dayTx").innerHTML=dt.length?dt.map(x=>`<div class="sm"><span>${esc(x.c)}${x.n?" · "+esc(x.n):""}</span><span class="${x.t}">${x.t==="in"?"+":"−"}${eur(x.a)}</span></div>`).join(""):`<div class="sm">${t("noMov")}</div>`;
+  $("dayN").innerHTML=`<h2>${t("notes")}</h2>`+notes.filter(x=>x.d===cd).map(x=>`<div class="nr"><span data-e="${x.id}">${esc(x.x)}</span><button class="x" data-r="${x.id}" aria-label="×">×</button></div>`).join("");
+}
+$("cp").onclick=()=>{cm=new Date(cm.getFullYear(),cm.getMonth()-1,1);cd=null;renderCal()};
+$("cn").onclick=()=>{cm=new Date(cm.getFullYear(),cm.getMonth()+1,1);cd=null;renderCal()};
+$("grid").onclick=e=>{const d=e.target.closest(".day");if(d){cd=d.dataset.d;renderCal()}};
+$("noteAdd").onclick=()=>{const v=$("noteIn").value.trim();if(!v||!cd)return;notes.push({id:Date.now()+"",d:cd,x:v});saveNotes();$("noteIn").value="";renderCal()};
+$("dayN").onclick=e=>{
+  const r=e.target.dataset.r,ed=e.target.dataset.e;
+  if(r){notes=notes.filter(x=>x.id!==r);saveNotes();renderCal()}
+  else if(ed){const n=notes.find(x=>x.id===ed),v=prompt(t("notes"),n.x);if(v===null)return;if(v.trim())n.x=v.trim();else notes=notes.filter(x=>x.id!==ed);saveNotes();renderCal()}
+};
+
+/* CSV (movimenti + note del mese) */
 $("csv").onclick=async()=>{
-  const m=tx.filter(t=>t.d.startsWith(ym(cur)));
-  const csv="Data;Tipo;Categoria;Importo;Nota\n"+m.map(t=>[t.d,t.t==="in"?"Entrata":"Uscita",t.c,String(t.a).replace(".",","),'"'+t.n.replace(/"/g,'""')+'"'].join(";")).join("\n");
+  const p=ym(cur),q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const r=[...tx.filter(x=>x.d.startsWith(p)).map(x=>({d:x.d,l:[x.d,x.t==="in"?t("tIn"):t("tOut"),x.c,String(x.a).replace(".",","),q(x.n||"")].join(";")})),
+    ...notes.filter(x=>x.d.startsWith(p)).map(x=>({d:x.d,l:[x.d,t("nt"),"","",q(x.x)].join(";")}))].sort((a,b)=>a.d.localeCompare(b.d));
+  const csv=t("hdr")+"\n"+r.map(x=>x.l).join("\n");
   try{
-    const S=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Share;
-    if(S){await S.share({title:"Conti "+ym(cur),text:csv,dialogTitle:"Esporta CSV"});return}
-    await navigator.clipboard.writeText(csv);alert("CSV copiato negli appunti.");
+    const Sh=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Share;
+    if(Sh){await Sh.share({title:"Conti "+p,text:csv,dialogTitle:t("csv")});return}
+    await navigator.clipboard.writeText(csv);alert(t("copied"));
   }catch(e){}
 };
-render();
+applyLang();setType("out");render();
 </script>
 </body>
 </html>
